@@ -6,6 +6,7 @@
 package edu.eci.arsw.blacklistvalidator;
 
 import edu.eci.arsw.spamkeywordsdatasource.HostBlacklistsDataSourceFacade;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
@@ -15,9 +16,11 @@ import java.util.logging.Logger;
  *
  * @author hcadavid
  */
-public class HostBlackListsValidator {
+public class HostBlackListsValidator extends Thread{
 
     private static final int BLACK_LIST_ALARM_COUNT=5;
+    int inicio, fin, hilos;
+
     
     /**
      * Check the given host's IP address in all the available black lists,
@@ -29,7 +32,13 @@ public class HostBlackListsValidator {
      * @param ipaddress suspicious host's IP address.
      * @return  Blacklists numbers where the given host's IP address was found.
      */
-    public List<Integer> checkHost(String ipaddress){
+    public List<Integer> checkHost(String ipaddress, int inicio, int fin){
+        this.hilos=hilos;
+        this.inicio=inicio;
+        this.fin=fin;
+
+
+
         
         LinkedList<Integer> blackListOcurrences=new LinkedList<>();
         
@@ -38,14 +47,15 @@ public class HostBlackListsValidator {
         HostBlacklistsDataSourceFacade skds=HostBlacklistsDataSourceFacade.getInstance();
         
         int checkedListsCount=0;
-        
-        for (int i=0;i<skds.getRegisteredServersCount() && ocurrencesCount<BLACK_LIST_ALARM_COUNT;i++){
+        int numeroHilos = skds.getRegisteredServersCount()/hilos;
+        for (int i=0;inicio<fin && ocurrencesCount<BLACK_LIST_ALARM_COUNT;i++){
             checkedListsCount++;
-            
+            inicio++;
+
             if (skds.isInBlackListServer(i, ipaddress)){
-                
+
                 blackListOcurrences.add(i);
-                
+
                 ocurrencesCount++;
             }
         }
